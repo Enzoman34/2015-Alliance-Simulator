@@ -7,7 +7,83 @@ class Robot(object):
 		self.time = [0]
 		self.points = [0]
 		sef.owned = 1
+		self.load = 0
 
-r1 = Robot(['UpTote','UpTote','Uptote','LazyStack'])
-r2 = Robot(['UpTote','Uptote','GreedyStack'])
-r3 = Robot(['UpTote','UpTote','Uptote','SelfishStack'])
+def cumsum(lis):
+    total = 0
+    for x in lis:
+        total += x
+        yield total
+
+def RunMatch(alliance):
+	elaspedtime = 0
+	maxtime = 135
+	bins = 4
+	maxstack = 4
+	#todo: add in coop thingy
+	stacks = [0,0,0,0,0,0,0,0,0,0]
+	while elaspedtime < maxtime:
+		elaspedtime = max(sum(alliance[0].time),sum(alliance[1].time),sum(alliance[2].time))
+		activebot = pick(alliance)
+		updatedbot,stacks,bins = Iterate(alliance[activebot],stacks,bins,maxstack)
+		alliance[activebot]= updatedbot
+def pick(alliance):
+	#might need to fix so that it picks the first one with the lowest time
+	activebot = min(sum(alliance[0].time),sum(alliance[0].time),sum(alliance[0].time)).index
+	return(activebot)
+
+def Iterate(bot,stacks,bins, maxstack):
+	action = bot.actions[bot.index]
+
+	#figure out active stack
+	if action == "LazyStack":
+		pass
+	if action == "GreedyStack":
+		pass
+	if action == "SelfishStack":
+		pass
+	#Assign time and point values for each action
+	if action == 'move':
+		dt = 1
+		dp = 0
+	elif action == 'LoadTote':
+		bot.load +=1
+	elif action == 'StackBin':
+		dt= 4
+	elif action == 'RecieveTote':
+		dt = 2
+	elif action == 'RecieveLitter':
+		dt =2
+	elif action == 'UseLitter':
+		dt= 5
+		dp = 6
+	elif action == 'GreedyStack':
+		dt = 3
+		dp = 2*bot.load
+		#update stacks
+	elif action == 'CopStack':
+		dt = 3
+		#give points if there are 2 coop bins
+		#remove Coop stack from actions
+	elif action == 'LazyStack':
+		dt = 3
+		dp = 2*bot.load
+		#update stacks
+	elif action == 'SelfishStack':
+		dt = 3
+		dp = 2*bot.load
+		#update stacks
+	else:
+		raise TypeError
+
+	bot.index +=1
+	return(bot, stacks,bins)
+
+# def placebin
+
+
+
+r1 = Robot(['LoadTote','move','LazyStack'])
+r2 = Robot(['LoadTote','LoadTote','GreedyStack'])
+r3 = Robot(['LoadTote','LoadTote','LoadTote','SelfishStack'])
+alliance = [r1,r2,r3]
