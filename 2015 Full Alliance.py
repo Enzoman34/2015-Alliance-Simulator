@@ -23,20 +23,27 @@ def firstMin(lis):
 
 
 def GreedyStack(bot, stacks, maxstack):
+	if min(stacks) >= maxstack:
+		return ValueError
 	for i in stacks:
-		if i == maxstack:
+		if i >= maxstack:
 			i=0
 	owned = stacks.index(max(stacks))
 	return owned
 
-def LazyStack(stacks):
-	return firstMin(stacks)
+def LazyStack(bot,stacks,maxstack):
+	if min(stacks) >= maxstack:
+		return ValueError
+	else:
+		return firstMin(stacks)
 
 def SelfishStack(bot,stacks,maxstack):
+	if min(stacks) >= maxstack:
+		return ValueError
 	if maxstack-(stacks[bot.owned]+bot.load)>0: 
 		return bot.owned
 	else:
-		return LazyStack(stacks)
+		return LazyStack(bot,stacks,maxstack)
 
 def Iterate(bot,stacks,bins, maxstack):
 	action = bot.actions[bot.ind]
@@ -48,12 +55,20 @@ def Iterate(bot,stacks,bins, maxstack):
 	if action == 'move':
 		dt = 1
 	elif action == 'LoadTote':
-		dt = 2
+		dt = 6
 		bot.load +=1
+	elif action == 'LoadBin':
+		if(bins >0):
+			dt = 6
+			bins += -1
+		else:
+			dt <-0
+			dp <- 0
+			#remove load bins and stack bins from actions
 	elif action == 'StackBin':
 		dt= 4
-		dp = 4*stack[activestack]
-		stack[activestack]+=1
+		dp = 4*stacks[bot.owned]
+		stacks[bot.owned]+=1
 	elif action == 'RecieveTote':
 		dt = 2
 		bot.load += 1
@@ -66,17 +81,35 @@ def Iterate(bot,stacks,bins, maxstack):
 		dt = 3
 		dp = 2*bot.load
 		bot.owned = GreedyStack(bot, stacks, maxstack)
-		stacks[bot.owned]+=bot.load
+		if stacks[bot.owned]+bot.load > maxstack:
+			stacks[bot.owned]+= maxstack-stacks[bot.owned]
+			bot.load = bot.load-(maxstack-stacks[bot.owned])
+			bot.ind += -1
+		else:
+			stacks[bot.owned]+=bot.load
+			bot.load=0
 	elif action == 'LazyStack':
 		dt = 3
 		dp = 2*bot.load
-		bot.owned = LazyStack(stacks)
-		stacks[bot.owned]+=bot.load
+		bot.owned = LazyStack(bot,stacks,maxstack)
+		if stacks[bot.owned]+bot.load > maxstack:
+			stacks[bot.owned]+= maxstack-stacks[bot.owned]
+			bot.load = bot.load-(maxstack-stacks[bot.owned])
+			bot.ind += -1
+		else:
+			stacks[bot.owned]+=bot.load
+			bot.load=0
 	elif action == 'SelfishStack':
 		dt = 3
 		dp = 2*bot.load
 		bot.owned = SelfishStack(bot,stacks,maxstack)
-		stacks[bot.owned]+=bot.load
+		if stacks[bot.owned]+bot.load > maxstack:
+			stacks[bot.owned]+= maxstack-stacks[bot.owned]
+			bot.load = bot.load-(maxstack-stacks[bot.owned])
+			bot.ind += -1
+		else:
+			stacks[bot.owned]+=bot.load
+			bot.load=0
 	elif action == 'CopStack':
 		dt = 3
 		#give points if there are 2 coop bins
@@ -89,6 +122,7 @@ def Iterate(bot,stacks,bins, maxstack):
 		bot.ind +=1
 	bot.time.append(dt)
 	bot.points.append(dp)
+	print stacks
 	return(bot, stacks,bins)
 
 
@@ -105,6 +139,7 @@ def RunMatch(alliance):
 	#todo: add in coop thingy
 	stacks = [0,0,0,0,0,0,0,0,0,0]
 	while elaspedtime < maxtime:
+		print
 		print elaspedtime, "\t",
 		elaspedtime = max(sum(alliance[0].time),sum(alliance[1].time),sum(alliance[2].time))
 		activebot = pick(alliance)
@@ -113,20 +148,16 @@ def RunMatch(alliance):
 		alliance[activebot]= updatedbot
 	robotresults = []
 	for i in alliance:
-		print i.points
 		i.points= list(cumsum(i.points))
 		i.time = list(cumsum(i.points))
-		print
-		print i.points
 		robotresults.append([i.time,i.points])
-		print "----------"
 	return robotresults
 # def placebin
 
 
 
-r1 = Robot(['LoadTote','move','LazyStack'],"first bot")
+r1 = Robot(['LoadTote','LazyStack'],"first bot")
 r2 = Robot(['LoadTote','LoadTote','GreedyStack'],"second bot")
-r3 = Robot(['LoadTote','LoadTote','LoadTote','move','SelfishStack'],"third bot")
+r3 = Robot(['LoadTote','LoadTote','LoadTote','SelfishStack','LoadBin','StackBin'],"third bot")
 alliance = [r1,r2,r3]
 Results=RunMatch(alliance)
