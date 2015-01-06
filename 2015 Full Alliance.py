@@ -2,7 +2,7 @@
 
 class Robot(object):
 	"""Holding all of the variables"""
-	def __init__(self, actions,name):
+	def __init__(self, actions,name,risk):
 		super(Robot, self).__init__()
 		self.ind = 0
 		self.actions = actions
@@ -13,6 +13,7 @@ class Robot(object):
 		self.name = name
 		self.timesum = [0]
 		self.pointsum = [0]
+		self.risk = risk
 
 def valid(bot,stacks,maxstack):
 	for i in stacks:
@@ -55,8 +56,8 @@ def stack(bot, stacks, maxstack, action):
 	except:
 		print "Out of stacking space"
 	dt = 3
-	print
-	print action,"load",bot.load, "targetstack",stacks[bot.owned], "ind",bot.ind
+	#print
+	#print action,"load",bot.load, "targetstack",stacks[bot.owned], "ind",bot.ind
 	if stacks[bot.owned]+bot.load > maxstack:
 		stacks[bot.owned]+= maxstack-stacks[bot.owned]
 		bot.load = bot.load -((maxstack-stacks[bot.owned])+1)
@@ -67,7 +68,7 @@ def stack(bot, stacks, maxstack, action):
 		stacks[bot.owned]+=bot.load
 		dp = 2*bot.load
 		bot.load=0
-	print "load",bot.load, "ind",bot.ind
+	#print "load",bot.load, "ind",bot.ind
 	return bot, stacks, dt, dp
 
 
@@ -140,7 +141,7 @@ def RunMatch(alliance):
 	#todo: add in coop thingy
 	stacks = [0,0,0,0,0,0,0,0,0,0]
 	while elaspedtime < maxtime:
-		print sum(alliance[0].time)
+		#print sum(alliance[0].time)
 		elaspedtime = max(sum(alliance[0].time),sum(alliance[1].time),sum(alliance[2].time))
 		activebot = pick(alliance)
 		updatedbot,stacks,bins = Iterate(alliance[activebot],stacks,bins,maxstack)
@@ -153,15 +154,20 @@ def RunMatch(alliance):
 		alliance[activebot]= updatedbot
 	robotresults = []
 	for i in alliance:
-		robotresults.append([i.timesum,i.pointsum])
+		robotresults.append([i.timesum,i.points])
 	return robotresults
 
 
-r1 = Robot(['LoadTote','move','move','move','LazyStack','move','move','move'],"first bot")
-r2 = Robot(['LoadTote','move','LoadTote','move','GreedyStack','move'],"second bot")
-r3 = Robot(['LoadTote','move','LoadTote','move','LoadTote','SelfishStack','move','move','LoadBin','move','move','StackBin','move'],"third bot")
+r1 = Robot(['LoadTote','move','move','move','LazyStack','move','move','move'],"first bot",1)
+r2 = Robot(['LoadTote','move','LoadTote','move','GreedyStack','move'],"second bot",1)
+r3 = Robot(['LoadTote','move','LoadTote','move','LoadTote','SelfishStack','move','move','LoadBin','move','move','StackBin','move'],"third bot",1)
 alliance = [r1,r2,r3]
 Results=RunMatch(alliance)
-print Results[0]
-print Results[1]
-print Results[2]
+col1=[]
+col2=[]
+col3=[]
+for i in range(0,3):
+	for b in range(0,len(Results[i][1])):
+		col1.append(alliance[i].name)
+		col2.append(Results[i][0][b])
+		col3.append(Results[i][1][b])
