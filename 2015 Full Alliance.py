@@ -1,4 +1,4 @@
-import pprint
+
 class Robot(object):
 	"""Holding all of the variables"""
 	def __init__(self, actions,name,risk):
@@ -170,22 +170,18 @@ for a in range(1,10):
 	Results.append(['noodmore',match])
 	match = RunMatch(alliance2,4,4,a)
 	Results.append(['noodless',match])
-col1=[]
-col2=[]
-col3=[]
-col4=[]
-col5=[]
-for match in range(1,10):
-	for robot in range(0,3):
-		for action in range(0,len(Results[match][1][robot])):
-			col1.append(alliance1[robot].name)
-			col2.append(Results[match][1][robot][action][0])
-			col3.append(Results[match][1][robot][action][1])
-			col4.append(match)
-			col5.append(Results[match][0])
 
-pp = pprint.PrettyPrinter(depth=5)
-pp.pprint(Results[1][1])
+resultTable=[]
+for match in range(1,10): 
+	for robot in range(0,3): 
+		row=[]
+		for action in range(0,len(Results[match][1][robot])): 
+ 			row.append(alliance1[robot].name) 
+			row.append(Results[match][1][robot][action][0]) 
+			row.append(Results[match][1][robot][action][1]) 
+			row.append(match) 
+ 			row.append(Results[match][0]) 
+	resultTable.append(row)
 
 
 ##print "col1"
