@@ -1,5 +1,4 @@
-
-
+import pprint
 class Robot(object):
 	"""Holding all of the variables"""
 	def __init__(self, actions,name,risk):
@@ -59,31 +58,37 @@ def stack(bot, stacks, maxstack, action):
 	#print
 	#print action,"load",bot.load, "targetstack",stacks[bot.owned], "ind",bot.ind
 	if stacks[bot.owned]+bot.load > maxstack:
-		stacks[bot.owned]+= maxstack-stacks[bot.owned]
+		stacks[bot.owned]+= float(maxstack-stacks[bot.owned])
 		bot.load = bot.load -((maxstack-stacks[bot.owned])+1)
 		dp = 2* ((maxstack-stacks[bot.owned])+1)
 		if bot.load >0:
 			bot.ind += -1
 	else:
-		stacks[bot.owned]+=bot.load
+		stacks[bot.owned]+=float(bot.load)
 		dp = 2*bot.load
 		bot.load=0
 	#print "load",bot.load, "ind",bot.ind
 	return bot, stacks, dt, dp
 
-
-def Iterate(bot,stacks,bins, maxstack):
+def Iterate(bot,stacks,bins, maxstack,value):
 	action = bot.actions[bot.ind]
 	#print action, bot.load,
 	#Assign time and point values for each action
+
+	Atotes=28
+
 	dp=0
 	dt=0
 	if action == 'move':
 		dt = 1
 		dp = 0
 	elif action == 'LoadTote':
-		dt = 4
-		bot.load +=1
+		if sum(stacks)-Atotes>0:
+			dt = 4
+			bot.load +=1
+		else:
+			bot.actions[bot.ind]="RecieveTote"
+			return(Iterate(bot,stacks,bins, maxstack,value))
 	elif action == 'LoadBin':
 		if(bins >0):
 			dt = 6
@@ -104,12 +109,12 @@ def Iterate(bot,stacks,bins, maxstack):
 			dp = 4*stacks[target]
 			stacks[target]+=10
 	elif action == 'RecieveTote':
-		dt = 2
+		dt = 7
 		bot.load += 1
 	elif action == 'RecieveLitter':
 		dt =2
 	elif action == 'UseLitter':
-		dt= 5
+		dt= value
 		dp = 6
 	elif action == 'GreedyStack':
 		bot, stacks,dt, dp =stack(bot, stacks, maxstack, action)
@@ -127,24 +132,21 @@ def Iterate(bot,stacks,bins, maxstack):
 	bot.points.append(dp)
 	return(bot, stacks,bins)
 
-
 def pick(alliance):
 	#might need to fix so that it picks the first one with the lowest time
 	activebot = firstMin([sum(alliance[0].time),sum(alliance[1].time),sum(alliance[2].time)])
 	return(activebot)
 
-def RunMatch(alliance):
+def RunMatch(alliance,bins,maxstack,value):
 	elaspedtime = 0
 	maxtime = 135
-	bins = 4
-	maxstack = 4
 	#todo: add in coop thingy
-	stacks = [0,0,0,0,0,0,0,0,0,0]
+	stacks = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
 	while elaspedtime < maxtime:
 		#print sum(alliance[0].time)
 		elaspedtime = max(sum(alliance[0].time),sum(alliance[1].time),sum(alliance[2].time))
 		activebot = pick(alliance)
-		updatedbot,stacks,bins = Iterate(alliance[activebot],stacks,bins,maxstack)
+		updatedbot,stacks,bins = Iterate(alliance[activebot],stacks,bins,maxstack,value)
 		if (updatedbot.ind+1) >= len(updatedbot.actions):
 			updatedbot.ind=0
 		else:
@@ -156,18 +158,43 @@ def RunMatch(alliance):
 	for i in alliance:
 		robotresults.append([i.timesum,i.points])
 	return robotresults
-
-
-r1 = Robot(['LoadTote','move','move','move','LazyStack','move','move','move'],"first bot",1)
-r2 = Robot(['LoadTote','move','LoadTote','move','GreedyStack','move'],"second bot",1)
-r3 = Robot(['LoadTote','move','LoadTote','move','LoadTote','SelfishStack','move','move','LoadBin','move','move','StackBin','move'],"third bot",1)
-alliance = [r1,r2,r3]
-Results=RunMatch(alliance)
+r1 = Robot(['move','LoadTote','move','LoadTote','move','SelfishStack','move'],"First bot",1)
+r2 = Robot(['LoadTote','move','LoadTote','move','SelfishStack','move'],"Second bot",1)
+r3 = Robot(['LoadTote','move','LoadTote','move','LoadTote','SelfishStack','move','move','RecieveLitter','UseLitter','LoadBin','move','move','StackBin','move'],"Noodles",1)
+r4 = Robot(['LoadTote','move','LoadTote','move','LoadTote','SelfishStack','move','move','LoadBin','move','move','StackBin','move'],"No Noodles",1)
+alliance1 = [r1,r2,r3]
+alliance2 = [r1,r2,r4]
+Results=[]
+for a in range(1,10):
+	match = RunMatch(alliance1,4,4,a)
+	Results.append(['noodmore',match])
+	match = RunMatch(alliance2,4,4,a)
+	Results.append(['noodless',match])
 col1=[]
 col2=[]
 col3=[]
-for i in range(0,3):
-	for b in range(0,len(Results[i][1])):
-		col1.append(alliance[i].name)
-		col2.append(Results[i][0][b])
-		col3.append(Results[i][1][b])
+col4=[]
+col5=[]
+for match in range(1,10):
+	for robot in range(0,3):
+		for action in range(0,len(Results[match][1][robot])):
+			col1.append(alliance1[robot].name)
+			col2.append(Results[match][1][robot][action][0])
+			col3.append(Results[match][1][robot][action][1])
+			col4.append(match)
+			col5.append(Results[match][0])
+
+pp = pprint.PrettyPrinter(depth=5)
+pp.pprint(Results[1][1])
+
+
+##print "col1"
+##print col1
+##print "col2"
+##print col2
+##print "col3"
+##print col3
+##print "col4"
+##print col4
+##print "col5"
+##print col5
