@@ -53,7 +53,7 @@ def stack(bot, stacks, maxstack, action):
 		elif action == "SelfishStack":
 			bot.owned = SelfishStack(bot, stacks, maxstack)
 	except:
-		print "Out of stacking space"
+		print ("Out of stacking space")
 	dt = 3
 	#print
 	#print action,"load",bot.load, "targetstack",stacks[bot.owned], "ind",bot.ind
@@ -172,18 +172,18 @@ for a in range(1,10):
 	Results.append(['noodless',match])
 
 resultTable=[]
-for match in range(1,10): 
-	for robot in range(0,3): 
-		row=[]
-		for action in range(0,len(Results[match][1][robot])): 
- 			row.append(alliance1[robot].name) 
-			row.append(Results[match][1][robot][action][0]) 
-			row.append(Results[match][1][robot][action][1]) 
-			row.append(match) 
- 			row.append(Results[match][0]) 
-	resultTable.append(row)
+for match in range(1,10):
+        for robot in range(0,3):
+                row=[]
+                for action in range(0,len(Results[match][1][robot])):
+                        row.append(alliance1[robot].name)
+                        row.append(Results[match][1][robot][action][0])
+                        row.append(Results[match][1][robot][action][1])
+                        row.append(match)
+                        row.append(Results[match][0])
+                resultTable.append(row)
 
-
+print (resultTable)
 ##print "col1"
 ##print col1
 ##print "col2"
