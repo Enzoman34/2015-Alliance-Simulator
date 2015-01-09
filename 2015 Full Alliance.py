@@ -172,18 +172,18 @@ for a in range(1,10):
 	Results.append(['noodless',match])
 
 resultTable=[]
+csvFile=open("sim.csv","w")
 for match in range(1,10):
         for robot in range(0,3):
                 row=[]
                 for action in range(0,len(Results[match][1][robot])):
-                        row.append(alliance1[robot].name)
-                        row.append(Results[match][1][robot][action][0])
-                        row.append(Results[match][1][robot][action][1])
-                        row.append(match)
-                        row.append(Results[match][0])
-                resultTable.append(row)
+                        csvFile.write(alliance1[robot].name+',')
+                        csvFile.write(str(Results[match][1][robot][action][0])+',')
+                        csvFile.write(str(Results[match][1][robot][action][1])+',')
+                        csvFile.write(str(match)+',')
+                        csvFile.write(str(Results[match][0])+'\n')
+csvFile.close()
 
-print (resultTable)
 ##print "col1"
 ##print col1
 ##print "col2"
